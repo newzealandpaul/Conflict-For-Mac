@@ -1,0 +1,41 @@
+#!/bin/bash
+
+
+rm build.dmg 2> /dev/null
+rm "Conflict For Mac.dmg"
+
+# Create an initial disk image (6 megs)
+#image_name="Conflict For Mac.dmg"
+
+hdiutil create -size 6m -fs HFS+ -volname "Conflict For Mac" build.dmg
+
+ 
+
+# Mount the disk image
+
+hdiutil attach build.dmg
+
+ 
+
+# Obtain device information
+
+DEVS=$(hdiutil attach build.dmg | cut -f 1)
+
+DEV=$(echo $DEVS | cut -f 1 -d ' ')
+
+DIR=$(mount | grep -i conflict | ruby -e 'gets;$_ =~ /.*\son\s(.*?)\s\(.*?\)/;puts $1')
+
+cp -r "Conflict For Mac.app" "$DIR/"
+cp "Conflict Manual.pdf" "$DIR/"
+
+# Unmount the disk image
+
+hdiutil detach $DEV
+
+ 
+
+# Convert the disk image to read-only
+
+hdiutil convert build.dmg -format UDZO -o "Conflict For Mac.dmg"
+
+rm build.dmg
